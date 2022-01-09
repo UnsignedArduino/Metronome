@@ -82,7 +82,11 @@ sprites.onCreated(SpriteKind.Text, function (sprite) {
     sprite.setFlag(SpriteFlag.Ghost, true)
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    beats_per_measure = Math.max(beats_per_measure - 1, 1)
+    if (controller.B.isPressed()) {
+        beat_precision = Math.max(beat_precision - 1, 1)
+    } else {
+        beats_per_measure = Math.max(beats_per_measure - 1, 1)
+    }
     update_beat_count()
 })
 function recalculate_pointer_velocity () {
@@ -92,7 +96,11 @@ sprites.onCreated(SpriteKind.BeatBar, function (sprite) {
     sprite.setFlag(SpriteFlag.Ghost, true)
 })
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    beats_per_measure = Math.min(beats_per_measure + 1, 16)
+    if (controller.B.isPressed()) {
+        beat_precision = Math.min(beat_precision + 1, 8)
+    } else {
+        beats_per_measure = Math.min(beats_per_measure + 1, 16)
+    }
     update_beat_count()
 })
 function create_text_sprites () {
@@ -194,6 +202,12 @@ game.onUpdate(function () {
 game.onUpdate(function () {
     text_beats_per_minute.setText("" + beats_per_minute)
     text_beats_per_measure.setText("" + beats_per_measure)
+    if (beat_precision > 1) {
+        text_divisions_per_beat.setText("" + beat_precision)
+    } else {
+        text_divisions_per_beat.setText("No")
+    }
+    sprites.readDataSprite(text_divisions_per_beat, "label").left = text_divisions_per_beat.right + 4
     for (let temp_text of sprites.allOfKind(SpriteKind.Text)) {
         if (!(sprites.readDataBoolean(temp_text, "has_label"))) {
             continue;
