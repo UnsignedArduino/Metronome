@@ -8,6 +8,9 @@ function update_beat_count () {
     text_current_beat.setText(current_beat_text)
     text_current_beat.right = scene.screenWidth() - 8
     create_metronome_measure()
+    if (metronome_en) {
+        recalculate_pointer_velocity()
+    }
 }
 sprites.onCreated(SpriteKind.SubBeatBar, function (sprite) {
     sprite.setFlag(SpriteFlag.Ghost, true)
@@ -17,6 +20,8 @@ function enable_metronome (en: boolean) {
     if (en) {
         recalculate_pointer_velocity()
         beat_of_measure = 0
+        last_beat = game.runtime() - (60 / (beats_per_minute * beat_precision) * 1000 - 1)
+        offtime = 0
     } else {
         sprite_beat_pointer.vx = 0
     }
@@ -156,6 +161,8 @@ let sprites_beat_bars: Sprite[] = []
 let sprite_beat_pointer: Sprite = null
 let text_current_beat: TextSprite = null
 let current_beat_text = ""
+let offtime = 0
+let last_beat = 0
 let beat_of_measure = 0
 let metronome_en = false
 let beat_precision = 0
@@ -167,7 +174,8 @@ beats_per_measure = 4
 beat_precision = 1
 metronome_en = false
 beat_of_measure = 0
-let last_beat = -500
+last_beat = -500
+offtime = 0
 current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
 scene.setBackgroundColor(13)
 create_metronome_measure()
@@ -175,30 +183,6 @@ create_beat_pointer()
 create_text_sprites()
 enable_metronome(false)
 controller.configureRepeatEventDefaults(500, 50)
-game.onUpdate(function () {
-    if (metronome_en) {
-        if (game.runtime() - last_beat >= 60 / (beats_per_minute * beat_precision) * 1000) {
-            last_beat = game.runtime()
-            music.stopAllSounds()
-            if (beat_of_measure == 0) {
-                music.playTone(523, music.beat(BeatFraction.Eighth))
-            } else if (beat_of_measure % beat_precision == 0) {
-                music.playTone(262, music.beat(BeatFraction.Eighth))
-            } else {
-                music.playTone(131, music.beat(BeatFraction.Eighth))
-            }
-            sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
-            highlight_beat(beat_of_measure)
-            current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
-            text_current_beat.setText(current_beat_text)
-            text_current_beat.right = scene.screenWidth() - 8
-            beat_of_measure += 1
-            if (beat_of_measure >= beats_per_measure * beat_precision) {
-                beat_of_measure = 0
-            }
-        }
-    }
-})
 game.onUpdate(function () {
     text_beats_per_minute.setText("" + beats_per_minute)
     text_beats_per_measure.setText("" + beats_per_measure)
@@ -213,5 +197,30 @@ game.onUpdate(function () {
             continue;
         }
         sprites.readDataSprite(temp_text, "label").left = temp_text.right + 4
+    }
+})
+forever(function () {
+    if (metronome_en) {
+        if (game.runtime() - (last_beat - offtime) >= 60 / (beats_per_minute * beat_precision) * 1000) {
+            offtime = game.runtime() - (last_beat - offtime) - 60 / (beats_per_minute * beat_precision) * 1000
+            last_beat = game.runtime()
+            music.stopAllSounds()
+            if (beat_of_measure == 0) {
+                music.playTone(523, music.beat(BeatFraction.Eighth))
+            } else if (beat_of_measure % beat_precision == 0) {
+                music.playTone(262, music.beat(BeatFraction.Eighth))
+            } else {
+                music.playTone(131, music.beat(BeatFraction.Eighth))
+            }
+            sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
+            current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
+            text_current_beat.setText(current_beat_text)
+            text_current_beat.right = scene.screenWidth() - 8
+            highlight_beat(beat_of_measure)
+            beat_of_measure += 1
+            if (beat_of_measure >= beats_per_measure * beat_precision) {
+                beat_of_measure = 0
+            }
+        }
     }
 })
