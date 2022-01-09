@@ -22,18 +22,24 @@ function create_metronome_measure () {
     tiles.destroySpritesOfKind(SpriteKind.BeatBar)
     tiles.destroySpritesOfKind(SpriteKind.SubBeatBar)
     sprites_beat_bars = []
-    px_per_beat = (scene.screenWidth() - 32) / (beats_per_measure * beat_precision)
+    px_per_beat = (scene.screenWidth() - (28 + current_beat_text.length * 10)) / (beats_per_measure * beat_precision)
     for (let index = 0; index <= beats_per_measure * beat_precision - 1; index++) {
         if (index % beat_precision == 0) {
             sprite_beatbar = sprites.create(assets.image`beat_bar`, SpriteKind.BeatBar)
-            sprite_beatbar.left = 16 + px_per_beat * index
+            sprite_beatbar.left = 8 + px_per_beat * index
         } else {
             sprite_beatbar = sprites.create(assets.image`sub_beat_bar`, SpriteKind.SubBeatBar)
-            sprite_beatbar.left = 17 + px_per_beat * index
+            sprite_beatbar.left = 9 + px_per_beat * index
         }
-        sprite_beatbar.top = 16
+        sprite_beatbar.top = 8
         sprites_beat_bars.push(sprite_beatbar)
     }
+}
+function create_text_sprites () {
+    text_current_beat = textsprite.create(current_beat_text, 0, 15)
+    text_current_beat.setMaxFontHeight(16)
+    text_current_beat.top = 8
+    text_current_beat.right = scene.screenWidth() - 8
 }
 function highlight_beat (beat: number) {
     for (let index = 0; index <= beats_per_measure * beat_precision - 1; index++) {
@@ -52,10 +58,12 @@ function highlight_beat (beat: number) {
         }
     }
 }
+let text_current_beat: TextSprite = null
 let sprite_beatbar: Sprite = null
 let sprites_beat_bars: Sprite[] = []
 let px_per_beat = 0
 let sprite_beat_pointer: Sprite = null
+let current_beat_text = ""
 let beat_of_measure = 0
 let metronome_en = false
 let beat_precision = 0
@@ -64,12 +72,14 @@ let beats_per_minute = 0
 beats_per_minute = 120
 beats_per_measure = 4
 beat_precision = 4
-let sound_en = true
+let sound_en = false
 metronome_en = false
 beat_of_measure = 0
 let last_beat = -500
+current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
 scene.setBackgroundColor(13)
 create_metronome_measure()
+create_text_sprites()
 create_beat_pointer()
 enable_metronome(true)
 game.onUpdate(function () {
@@ -88,6 +98,8 @@ game.onUpdate(function () {
             }
             sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
             highlight_beat(beat_of_measure)
+            current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
+            text_current_beat.setText(current_beat_text)
             beat_of_measure += 1
             if (beat_of_measure >= beats_per_measure * beat_precision) {
                 beat_of_measure = 0
