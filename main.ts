@@ -63,7 +63,7 @@ let beats_per_measure = 0
 let beats_per_minute = 0
 beats_per_minute = 120
 beats_per_measure = 4
-beat_precision = 1
+beat_precision = 4
 let sound_en = true
 metronome_en = false
 beat_of_measure = 0
@@ -77,6 +77,7 @@ game.onUpdate(function () {
         if (game.runtime() - last_beat >= 60 / (beats_per_minute * beat_precision) * 1000) {
             last_beat = game.runtime()
             if (sound_en) {
+                music.stopAllSounds()
                 if (beat_of_measure == 0) {
                     music.playTone(523, music.beat(BeatFraction.Sixteenth))
                 } else if (beat_of_measure % beat_precision == 0) {
