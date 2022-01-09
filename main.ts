@@ -15,5 +15,13 @@ let px_per_beat = 0
 let beats_per_measure = 0
 let beats_per_minute = 120
 beats_per_measure = 4
+let enable_metronome = true
 scene.setBackgroundColor(13)
 create_metronome_measure()
+forever(function () {
+    if (enable_metronome) {
+        timer.throttle("actual_beat", 60 / beats_per_minute * 1000, function () {
+            music.playTone(262, music.beat(BeatFraction.Sixteenth))
+        })
+    }
+})
