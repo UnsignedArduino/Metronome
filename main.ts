@@ -16,6 +16,7 @@ function enable_metronome (en: boolean) {
     metronome_en = en
     if (en) {
         recalculate_pointer_velocity()
+        beat_of_measure = 0
     } else {
         sprite_beat_pointer.vx = 0
     }
@@ -168,6 +169,8 @@ game.onUpdate(function () {
                     music.playTone(131, music.beat(BeatFraction.Sixteenth))
                 }
             }
+            sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
+            highlight_beat(beat_of_measure)
             beat_of_measure += 1
             if (beat_of_measure >= beats_per_measure * beat_precision) {
                 beat_of_measure = 0
@@ -187,6 +190,4 @@ game.onUpdate(function () {
         }
         sprites.readDataSprite(temp_text, "label").left = temp_text.right + 4
     }
-    sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
-    highlight_beat(beat_of_measure)
 })
