@@ -28,6 +28,15 @@ function create_metronome_measure () {
         sprites_beat_bars.push(sprite_beatbar)
     }
 }
+function highlight_beat (beat: number) {
+    for (let index = 0; index <= beats_per_measure - 1; index++) {
+        if (beat == index) {
+            sprites_beat_bars[index].setImage(assets.image`higlighted_beat_bar`)
+        } else {
+            sprites_beat_bars[index].setImage(assets.image`beat_bar`)
+        }
+    }
+}
 let sprite_beatbar: Sprite = null
 let sprites_beat_bars: Sprite[] = []
 let px_per_beat = 0
@@ -47,8 +56,13 @@ enable_metronome(true)
 forever(function () {
     if (metronome_en) {
         timer.throttle("actual_beat", 60 / beats_per_minute * 1000, function () {
-            music.playTone(262, music.beat(BeatFraction.Sixteenth))
+            if (beat_of_measure == 0) {
+                music.playTone(523, music.beat(BeatFraction.Sixteenth))
+            } else {
+                music.playTone(262, music.beat(BeatFraction.Sixteenth))
+            }
             sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
+            highlight_beat(beat_of_measure)
             beat_of_measure += 1
             if (beat_of_measure >= beats_per_measure) {
                 beat_of_measure = 0

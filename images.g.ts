@@ -29,6 +29,25 @@ f f f f
 f f . . f f 
 f . . . . f 
 `;
+            case "image3":
+            case "higlighted_beat_bar":return img`
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+2 2 2 2 
+`;
         }
         return null;
     })
