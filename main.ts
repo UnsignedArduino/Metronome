@@ -164,7 +164,7 @@ let beats_per_minute = 0
 stats.turnStats(true)
 beats_per_minute = 120
 beats_per_measure = 4
-beat_precision = 4
+beat_precision = 1
 metronome_en = false
 beat_of_measure = 0
 let last_beat = -500
@@ -181,11 +181,11 @@ game.onUpdate(function () {
             last_beat = game.runtime()
             music.stopAllSounds()
             if (beat_of_measure == 0) {
-                music.playTone(523, music.beat(BeatFraction.Sixteenth))
+                music.playTone(523, music.beat(BeatFraction.Eighth))
             } else if (beat_of_measure % beat_precision == 0) {
-                music.playTone(262, music.beat(BeatFraction.Sixteenth))
+                music.playTone(262, music.beat(BeatFraction.Eighth))
             } else {
-                music.playTone(131, music.beat(BeatFraction.Sixteenth))
+                music.playTone(131, music.beat(BeatFraction.Eighth))
             }
             sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
             highlight_beat(beat_of_measure)
