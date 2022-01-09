@@ -27,8 +27,7 @@ function create_beat_pointer () {
     sprite_beat_pointer.x = sprites_beat_bars[0].x
 }
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    beats_per_minute = Math.min(beats_per_minute + 1, 208)
-    recalculate_pointer_velocity()
+    increase_bpm()
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     sound_en = !(sound_en)
@@ -40,10 +39,21 @@ function create_text_sprite_top_right (text: string, top: number, right: number)
     temp_text.right = right
     return temp_text
 }
+function decrease_bpm () {
+    beats_per_minute = Math.max(beats_per_minute - 1, 40)
+    if (metronome_en) {
+        recalculate_pointer_velocity()
+    }
+}
 controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
-    beats_per_minute = Math.min(beats_per_minute + 1, 208)
-    recalculate_pointer_velocity()
+    increase_bpm()
 })
+function increase_bpm () {
+    beats_per_minute = Math.min(beats_per_minute + 1, 208)
+    if (metronome_en) {
+        recalculate_pointer_velocity()
+    }
+}
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     enable_metronome(!(metronome_en))
 })
@@ -63,6 +73,13 @@ function create_metronome_measure () {
         sprite_beatbar.top = 8
         sprites_beat_bars.push(sprite_beatbar)
     }
+}
+function create_text_sprite_top_left (text: string, top: number, left: number) {
+    temp_text = textsprite.create(text, 0, 15)
+    temp_text.setMaxFontHeight(16)
+    temp_text.top = top
+    temp_text.left = left
+    return temp_text
 }
 sprites.onCreated(SpriteKind.Text, function (sprite) {
     sprite.setFlag(SpriteFlag.Ghost, true)
@@ -85,14 +102,13 @@ function create_text_sprites () {
     text_current_beat = create_text_sprite_top_right(current_beat_text, 8, scene.screenWidth() - 8)
     text_beats_per_minute = create_labeled_text_sprite_top_left("" + beats_per_minute, sprite_beat_pointer.bottom + 4, 8, "beats per minute")
     text_beats_per_measure = create_labeled_text_sprite_top_left("" + beats_per_measure, text_beats_per_minute.bottom + 4, 8, "beats per measure")
+    text_divisions_per_beat = create_labeled_text_sprite_top_left("" + beat_precision, text_beats_per_measure.bottom + 4, 8, "subdivisions")
 }
 controller.down.onEvent(ControllerButtonEvent.Repeated, function () {
-    beats_per_minute = Math.max(beats_per_minute - 1, 40)
-    recalculate_pointer_velocity()
+    decrease_bpm()
 })
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    beats_per_minute = Math.max(beats_per_minute - 1, 40)
-    recalculate_pointer_velocity()
+    decrease_bpm()
 })
 function create_labeled_text_sprite_top_left (text: string, top: number, left: number, label: string) {
     temp_text = textsprite.create(text, 0, 15)
@@ -125,6 +141,7 @@ function highlight_beat (beat: number) {
         }
     }
 }
+let text_divisions_per_beat: TextSprite = null
 let text_beats_per_measure: TextSprite = null
 let text_beats_per_minute: TextSprite = null
 let sprite_beatbar: Sprite = null
