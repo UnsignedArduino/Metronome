@@ -18,6 +18,13 @@ function create_beat_pointer () {
     sprite_beat_pointer.top = sprites_beat_bars[0].bottom + 4
     sprite_beat_pointer.x = sprites_beat_bars[0].x
 }
+function create_text_sprite_top_right (text: string, top: number, right: number) {
+    temp_text = textsprite.create(text, 0, 15)
+    temp_text.setMaxFontHeight(16)
+    temp_text.top = top
+    temp_text.right = right
+    return temp_text
+}
 function create_metronome_measure () {
     tiles.destroySpritesOfKind(SpriteKind.BeatBar)
     tiles.destroySpritesOfKind(SpriteKind.SubBeatBar)
@@ -36,10 +43,20 @@ function create_metronome_measure () {
     }
 }
 function create_text_sprites () {
-    text_current_beat = textsprite.create(current_beat_text, 0, 15)
-    text_current_beat.setMaxFontHeight(16)
-    text_current_beat.top = 8
-    text_current_beat.right = scene.screenWidth() - 8
+    text_current_beat = create_text_sprite_top_right(current_beat_text, 8, scene.screenWidth() - 8)
+    text_beats_per_minute = create_labeled_text_sprite_top_left("" + beats_per_minute, sprite_beat_pointer.bottom + 4, 8, "beats per minute")
+    text_beats_per_measure = create_labeled_text_sprite_top_left("" + beats_per_measure, text_beats_per_minute.bottom + 4, 8, "beats per measure")
+}
+function create_labeled_text_sprite_top_left (text: string, top: number, left: number, label: string) {
+    temp_text = textsprite.create(text, 0, 15)
+    temp_text.setMaxFontHeight(16)
+    temp_text.top = top
+    temp_text.left = left
+    sprites.setDataBoolean(temp_text, "has_label", true)
+    sprites.setDataSprite(temp_text, "label", textsprite.create(label, 0, 15))
+    sprites.readDataSprite(temp_text, "label").bottom = temp_text.bottom
+    sprites.readDataSprite(temp_text, "label").left = temp_text.right + 4
+    return temp_text
 }
 function highlight_beat (beat: number) {
     for (let index = 0; index <= beats_per_measure * beat_precision - 1; index++) {
@@ -58,8 +75,11 @@ function highlight_beat (beat: number) {
         }
     }
 }
+let text_beats_per_measure: TextSprite = null
+let text_beats_per_minute: TextSprite = null
 let text_current_beat: TextSprite = null
 let sprite_beatbar: Sprite = null
+let temp_text: TextSprite = null
 let sprites_beat_bars: Sprite[] = []
 let px_per_beat = 0
 let sprite_beat_pointer: Sprite = null
@@ -79,8 +99,8 @@ let last_beat = -500
 current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
 scene.setBackgroundColor(13)
 create_metronome_measure()
-create_text_sprites()
 create_beat_pointer()
+create_text_sprites()
 enable_metronome(true)
 game.onUpdate(function () {
     if (metronome_en) {
@@ -105,5 +125,15 @@ game.onUpdate(function () {
                 beat_of_measure = 0
             }
         }
+    }
+})
+game.onUpdate(function () {
+    text_beats_per_minute.setText("" + beats_per_minute)
+    text_beats_per_measure.setText("" + beats_per_measure)
+    for (let temp_text of sprites.allOfKind(SpriteKind.Text)) {
+        if (!(sprites.readDataBoolean(temp_text, "has_label"))) {
+            continue;
+        }
+        sprites.readDataSprite(temp_text, "label").left = temp_text.right + 4
     }
 })
