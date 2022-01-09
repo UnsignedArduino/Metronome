@@ -2,17 +2,21 @@ namespace SpriteKind {
     export const BeatBar = SpriteKind.create()
     export const SubBeatBar = SpriteKind.create()
 }
+function update_beat_count () {
+    beat_of_measure = 0
+    current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
+    text_current_beat.setText(current_beat_text)
+    text_current_beat.right = scene.screenWidth() - 8
+    create_metronome_measure()
+}
 sprites.onCreated(SpriteKind.SubBeatBar, function (sprite) {
     sprite.setFlag(SpriteFlag.Ghost, true)
 })
 function enable_metronome (en: boolean) {
     metronome_en = en
     if (en) {
-        beat_of_measure = 0
-        sprite_beat_pointer.setFlag(SpriteFlag.Invisible, false)
-        sprite_beat_pointer.vx = beats_per_minute * beat_precision / 60 * px_per_beat
+        recalculate_pointer_velocity()
     } else {
-        sprite_beat_pointer.setFlag(SpriteFlag.Invisible, true)
         sprite_beat_pointer.vx = 0
     }
 }
@@ -21,6 +25,13 @@ function create_beat_pointer () {
     sprite_beat_pointer.top = sprites_beat_bars[0].bottom + 4
     sprite_beat_pointer.x = sprites_beat_bars[0].x
 }
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    beats_per_minute = Math.min(beats_per_minute + 1, 208)
+    recalculate_pointer_velocity()
+})
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    sound_en = !(sound_en)
+})
 function create_text_sprite_top_right (text: string, top: number, right: number) {
     temp_text = textsprite.create(text, 0, 15)
     temp_text.setMaxFontHeight(16)
@@ -28,6 +39,13 @@ function create_text_sprite_top_right (text: string, top: number, right: number)
     temp_text.right = right
     return temp_text
 }
+controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
+    beats_per_minute = Math.min(beats_per_minute + 1, 208)
+    recalculate_pointer_velocity()
+})
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    enable_metronome(!(metronome_en))
+})
 function create_metronome_measure () {
     tiles.destroySpritesOfKind(SpriteKind.BeatBar)
     tiles.destroySpritesOfKind(SpriteKind.SubBeatBar)
@@ -48,14 +66,33 @@ function create_metronome_measure () {
 sprites.onCreated(SpriteKind.Text, function (sprite) {
     sprite.setFlag(SpriteFlag.Ghost, true)
 })
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    beats_per_measure = Math.max(beats_per_measure - 1, 1)
+    update_beat_count()
+})
+function recalculate_pointer_velocity () {
+    sprite_beat_pointer.vx = beats_per_minute * beat_precision / 60 * px_per_beat
+}
 sprites.onCreated(SpriteKind.BeatBar, function (sprite) {
     sprite.setFlag(SpriteFlag.Ghost, true)
+})
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    beats_per_measure = Math.min(beats_per_measure + 1, 16)
+    update_beat_count()
 })
 function create_text_sprites () {
     text_current_beat = create_text_sprite_top_right(current_beat_text, 8, scene.screenWidth() - 8)
     text_beats_per_minute = create_labeled_text_sprite_top_left("" + beats_per_minute, sprite_beat_pointer.bottom + 4, 8, "beats per minute")
     text_beats_per_measure = create_labeled_text_sprite_top_left("" + beats_per_measure, text_beats_per_minute.bottom + 4, 8, "beats per measure")
 }
+controller.down.onEvent(ControllerButtonEvent.Repeated, function () {
+    beats_per_minute = Math.max(beats_per_minute - 1, 40)
+    recalculate_pointer_velocity()
+})
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    beats_per_minute = Math.max(beats_per_minute - 1, 40)
+    recalculate_pointer_velocity()
+})
 function create_labeled_text_sprite_top_left (text: string, top: number, left: number, label: string) {
     temp_text = textsprite.create(text, 0, 15)
     temp_text.setMaxFontHeight(16)
@@ -89,15 +126,16 @@ function highlight_beat (beat: number) {
 }
 let text_beats_per_measure: TextSprite = null
 let text_beats_per_minute: TextSprite = null
-let text_current_beat: TextSprite = null
 let sprite_beatbar: Sprite = null
+let px_per_beat = 0
 let temp_text: TextSprite = null
 let sprites_beat_bars: Sprite[] = []
-let px_per_beat = 0
 let sprite_beat_pointer: Sprite = null
+let text_current_beat: TextSprite = null
 let current_beat_text = ""
 let beat_of_measure = 0
 let metronome_en = false
+let sound_en = false
 let beat_precision = 0
 let beats_per_measure = 0
 let beats_per_minute = 0
@@ -105,7 +143,7 @@ stats.turnStats(true)
 beats_per_minute = 120
 beats_per_measure = 4
 beat_precision = 4
-let sound_en = false
+sound_en = true
 metronome_en = false
 beat_of_measure = 0
 let last_beat = -500
@@ -114,7 +152,8 @@ scene.setBackgroundColor(13)
 create_metronome_measure()
 create_beat_pointer()
 create_text_sprites()
-enable_metronome(true)
+enable_metronome(false)
+controller.configureRepeatEventDefaults(500, 50)
 game.onUpdate(function () {
     if (metronome_en) {
         if (game.runtime() - last_beat >= 60 / (beats_per_minute * beat_precision) * 1000) {
@@ -129,10 +168,6 @@ game.onUpdate(function () {
                     music.playTone(131, music.beat(BeatFraction.Sixteenth))
                 }
             }
-            sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
-            highlight_beat(beat_of_measure)
-            current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
-            text_current_beat.setText(current_beat_text)
             beat_of_measure += 1
             if (beat_of_measure >= beats_per_measure * beat_precision) {
                 beat_of_measure = 0
@@ -143,10 +178,15 @@ game.onUpdate(function () {
 game.onUpdate(function () {
     text_beats_per_minute.setText("" + beats_per_minute)
     text_beats_per_measure.setText("" + beats_per_measure)
+    current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
+    text_current_beat.setText(current_beat_text)
+    text_current_beat.right = scene.screenWidth() - 8
     for (let temp_text of sprites.allOfKind(SpriteKind.Text)) {
         if (!(sprites.readDataBoolean(temp_text, "has_label"))) {
             continue;
         }
         sprites.readDataSprite(temp_text, "label").left = temp_text.right + 4
     }
+    sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
+    highlight_beat(beat_of_measure)
 })
