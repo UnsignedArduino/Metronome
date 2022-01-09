@@ -22,6 +22,13 @@ f f f f
 f f f f 
 f f f f 
 `;
+            case "image2":
+            case "beat_pointer":return img`
+. . f f . . 
+. f f f f . 
+f f . . f f 
+f . . . . f 
+`;
         }
         return null;
     })
