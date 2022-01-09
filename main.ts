@@ -2,6 +2,9 @@ namespace SpriteKind {
     export const BeatBar = SpriteKind.create()
     export const SubBeatBar = SpriteKind.create()
 }
+sprites.onCreated(SpriteKind.SubBeatBar, function (sprite) {
+    sprite.setFlag(SpriteFlag.Ghost, true)
+})
 function enable_metronome (en: boolean) {
     metronome_en = en
     if (en) {
@@ -42,6 +45,12 @@ function create_metronome_measure () {
         sprites_beat_bars.push(sprite_beatbar)
     }
 }
+sprites.onCreated(SpriteKind.Text, function (sprite) {
+    sprite.setFlag(SpriteFlag.Ghost, true)
+})
+sprites.onCreated(SpriteKind.BeatBar, function (sprite) {
+    sprite.setFlag(SpriteFlag.Ghost, true)
+})
 function create_text_sprites () {
     text_current_beat = create_text_sprite_top_right(current_beat_text, 8, scene.screenWidth() - 8)
     text_beats_per_minute = create_labeled_text_sprite_top_left("" + beats_per_minute, sprite_beat_pointer.bottom + 4, 8, "beats per minute")
@@ -58,6 +67,9 @@ function create_labeled_text_sprite_top_left (text: string, top: number, left: n
     sprites.readDataSprite(temp_text, "label").left = temp_text.right + 4
     return temp_text
 }
+sprites.onCreated(SpriteKind.Player, function (sprite) {
+    sprite.setFlag(SpriteFlag.Ghost, true)
+})
 function highlight_beat (beat: number) {
     for (let index = 0; index <= beats_per_measure * beat_precision - 1; index++) {
         if (beat == index) {
@@ -89,6 +101,7 @@ let metronome_en = false
 let beat_precision = 0
 let beats_per_measure = 0
 let beats_per_minute = 0
+stats.turnStats(true)
 beats_per_minute = 120
 beats_per_measure = 4
 beat_precision = 4
