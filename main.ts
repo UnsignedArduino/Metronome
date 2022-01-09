@@ -188,6 +188,9 @@ game.onUpdate(function () {
             }
             sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
             highlight_beat(beat_of_measure)
+            current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
+            text_current_beat.setText(current_beat_text)
+            text_current_beat.right = scene.screenWidth() - 8
             beat_of_measure += 1
             if (beat_of_measure >= beats_per_measure * beat_precision) {
                 beat_of_measure = 0
@@ -198,9 +201,6 @@ game.onUpdate(function () {
 game.onUpdate(function () {
     text_beats_per_minute.setText("" + beats_per_minute)
     text_beats_per_measure.setText("" + beats_per_measure)
-    current_beat_text = "" + (Math.floor(beat_of_measure / beat_precision) + 1) + "/" + beats_per_measure
-    text_current_beat.setText(current_beat_text)
-    text_current_beat.right = scene.screenWidth() - 8
     for (let temp_text of sprites.allOfKind(SpriteKind.Text)) {
         if (!(sprites.readDataBoolean(temp_text, "has_label"))) {
             continue;
