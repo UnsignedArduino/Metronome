@@ -56,29 +56,34 @@ let sprite_beatbar: Sprite = null
 let sprites_beat_bars: Sprite[] = []
 let px_per_beat = 0
 let sprite_beat_pointer: Sprite = null
-let metronome_en = false
 let beat_of_measure = 0
+let metronome_en = false
 let beat_precision = 0
 let beats_per_measure = 0
 let beats_per_minute = 0
 beats_per_minute = 120
 beats_per_measure = 4
-beat_precision = 4
-beat_of_measure = 0
+beat_precision = 1
+let sound_en = true
 metronome_en = false
+beat_of_measure = 0
+let last_beat = -500
 scene.setBackgroundColor(13)
 create_metronome_measure()
 create_beat_pointer()
 enable_metronome(true)
-forever(function () {
+game.onUpdate(function () {
     if (metronome_en) {
-        timer.throttle("actual_beat", 60 / (beats_per_minute * beat_precision) * 1000, function () {
-            if (beat_of_measure == 0) {
-                music.playTone(523, music.beat(BeatFraction.Sixteenth))
-            } else if (beat_of_measure % beat_precision == 0) {
-                music.playTone(262, music.beat(BeatFraction.Sixteenth))
-            } else {
-                music.playTone(131, music.beat(BeatFraction.Sixteenth))
+        if (game.runtime() - last_beat >= 60 / (beats_per_minute * beat_precision) * 1000) {
+            last_beat = game.runtime()
+            if (sound_en) {
+                if (beat_of_measure == 0) {
+                    music.playTone(523, music.beat(BeatFraction.Sixteenth))
+                } else if (beat_of_measure % beat_precision == 0) {
+                    music.playTone(262, music.beat(BeatFraction.Sixteenth))
+                } else {
+                    music.playTone(131, music.beat(BeatFraction.Sixteenth))
+                }
             }
             sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
             highlight_beat(beat_of_measure)
@@ -86,6 +91,6 @@ forever(function () {
             if (beat_of_measure >= beats_per_measure * beat_precision) {
                 beat_of_measure = 0
             }
-        })
+        }
     }
 })
