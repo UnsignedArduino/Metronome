@@ -1,0 +1,12 @@
+{
+    "image1": {
+        "data": "hwQEABAAAAD//////////////////////////////////////////w==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "beat_bar"
+    },
+    "*": {
+        "mimeType": "image/x-mkcd-f4",
+        "dataEncoding": "base64",
+        "namespace": "myImages"
+    }
+}
