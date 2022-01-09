@@ -1,13 +1,23 @@
 {
-    "image1": {
-        "data": "hwQEABAAAAD//////////////////////////////////////////w==",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "beat_bar"
-    },
     "image2": {
         "data": "hwQGAAQAAAAA/wAA8A8AAP8AAAD/AAAA8A8AAAD/AAA=",
         "mimeType": "image/x-mkcd-f4",
         "displayName": "beat_pointer"
+    },
+    "image5": {
+        "data": "hwQCAAgAAAAzMzMzMzMzMw==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "highlighted_sub_beat_bar"
+    },
+    "image4": {
+        "data": "hwQCAAgAAADMzMzMzMzMzA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "sub_beat_bar"
+    },
+    "image1": {
+        "data": "hwQEABAAAAD//////////////////////////////////////////w==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "beat_bar"
     },
     "image3": {
         "data": "hwQEABAAAAAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIg==",

@@ -1,12 +1,13 @@
 namespace SpriteKind {
     export const BeatBar = SpriteKind.create()
+    export const SubBeatBar = SpriteKind.create()
 }
 function enable_metronome (en: boolean) {
     metronome_en = en
     if (en) {
         beat_of_measure = 0
         sprite_beat_pointer.setFlag(SpriteFlag.Invisible, false)
-        sprite_beat_pointer.vx = 1000 / (60 / beats_per_minute * 1000) * px_per_beat
+        sprite_beat_pointer.vx = beats_per_minute * beat_precision / 60 * px_per_beat
     } else {
         sprite_beat_pointer.setFlag(SpriteFlag.Invisible, true)
         sprite_beat_pointer.vx = 0
@@ -19,21 +20,35 @@ function create_beat_pointer () {
 }
 function create_metronome_measure () {
     tiles.destroySpritesOfKind(SpriteKind.BeatBar)
+    tiles.destroySpritesOfKind(SpriteKind.SubBeatBar)
     sprites_beat_bars = []
-    px_per_beat = (scene.screenWidth() - 32) / beats_per_measure
-    for (let index = 0; index <= beats_per_measure - 1; index++) {
-        sprite_beatbar = sprites.create(assets.image`beat_bar`, SpriteKind.BeatBar)
+    px_per_beat = (scene.screenWidth() - 32) / (beats_per_measure * beat_precision)
+    for (let index = 0; index <= beats_per_measure * beat_precision - 1; index++) {
+        if (index % beat_precision == 0) {
+            sprite_beatbar = sprites.create(assets.image`beat_bar`, SpriteKind.BeatBar)
+            sprite_beatbar.left = 16 + px_per_beat * index
+        } else {
+            sprite_beatbar = sprites.create(assets.image`sub_beat_bar`, SpriteKind.SubBeatBar)
+            sprite_beatbar.left = 17 + px_per_beat * index
+        }
         sprite_beatbar.top = 16
-        sprite_beatbar.left = 16 + px_per_beat * index
         sprites_beat_bars.push(sprite_beatbar)
     }
 }
 function highlight_beat (beat: number) {
-    for (let index = 0; index <= beats_per_measure - 1; index++) {
+    for (let index = 0; index <= beats_per_measure * beat_precision - 1; index++) {
         if (beat == index) {
-            sprites_beat_bars[index].setImage(assets.image`higlighted_beat_bar`)
+            if (sprites_beat_bars[index].kind() == SpriteKind.BeatBar) {
+                sprites_beat_bars[index].setImage(assets.image`higlighted_beat_bar`)
+            } else {
+                sprites_beat_bars[index].setImage(assets.image`highlighted_sub_beat_bar`)
+            }
         } else {
-            sprites_beat_bars[index].setImage(assets.image`beat_bar`)
+            if (sprites_beat_bars[index].kind() == SpriteKind.BeatBar) {
+                sprites_beat_bars[index].setImage(assets.image`beat_bar`)
+            } else {
+                sprites_beat_bars[index].setImage(assets.image`sub_beat_bar`)
+            }
         }
     }
 }
@@ -43,10 +58,12 @@ let px_per_beat = 0
 let sprite_beat_pointer: Sprite = null
 let metronome_en = false
 let beat_of_measure = 0
+let beat_precision = 0
 let beats_per_measure = 0
 let beats_per_minute = 0
 beats_per_minute = 120
 beats_per_measure = 4
+beat_precision = 4
 beat_of_measure = 0
 metronome_en = false
 scene.setBackgroundColor(13)
@@ -55,16 +72,18 @@ create_beat_pointer()
 enable_metronome(true)
 forever(function () {
     if (metronome_en) {
-        timer.throttle("actual_beat", 60 / beats_per_minute * 1000, function () {
+        timer.throttle("actual_beat", 60 / (beats_per_minute * beat_precision) * 1000, function () {
             if (beat_of_measure == 0) {
                 music.playTone(523, music.beat(BeatFraction.Sixteenth))
-            } else {
+            } else if (beat_of_measure % beat_precision == 0) {
                 music.playTone(262, music.beat(BeatFraction.Sixteenth))
+            } else {
+                music.playTone(131, music.beat(BeatFraction.Sixteenth))
             }
             sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
             highlight_beat(beat_of_measure)
             beat_of_measure += 1
-            if (beat_of_measure >= beats_per_measure) {
+            if (beat_of_measure >= beats_per_measure * beat_precision) {
                 beat_of_measure = 0
             }
         })
