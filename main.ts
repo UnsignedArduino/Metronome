@@ -29,9 +29,6 @@ function create_beat_pointer () {
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     increase_bpm()
 })
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    sound_en = !(sound_en)
-})
 function create_text_sprite_top_right (text: string, top: number, right: number) {
     temp_text = textsprite.create(text, 0, 15)
     temp_text.setMaxFontHeight(16)
@@ -153,7 +150,6 @@ let text_current_beat: TextSprite = null
 let current_beat_text = ""
 let beat_of_measure = 0
 let metronome_en = false
-let sound_en = false
 let beat_precision = 0
 let beats_per_measure = 0
 let beats_per_minute = 0
@@ -161,7 +157,6 @@ stats.turnStats(true)
 beats_per_minute = 120
 beats_per_measure = 4
 beat_precision = 4
-sound_en = true
 metronome_en = false
 beat_of_measure = 0
 let last_beat = -500
@@ -176,15 +171,13 @@ game.onUpdate(function () {
     if (metronome_en) {
         if (game.runtime() - last_beat >= 60 / (beats_per_minute * beat_precision) * 1000) {
             last_beat = game.runtime()
-            if (sound_en) {
-                music.stopAllSounds()
-                if (beat_of_measure == 0) {
-                    music.playTone(523, music.beat(BeatFraction.Sixteenth))
-                } else if (beat_of_measure % beat_precision == 0) {
-                    music.playTone(262, music.beat(BeatFraction.Sixteenth))
-                } else {
-                    music.playTone(131, music.beat(BeatFraction.Sixteenth))
-                }
+            music.stopAllSounds()
+            if (beat_of_measure == 0) {
+                music.playTone(523, music.beat(BeatFraction.Sixteenth))
+            } else if (beat_of_measure % beat_precision == 0) {
+                music.playTone(262, music.beat(BeatFraction.Sixteenth))
+            } else {
+                music.playTone(131, music.beat(BeatFraction.Sixteenth))
             }
             sprite_beat_pointer.x = sprites_beat_bars[beat_of_measure].x
             highlight_beat(beat_of_measure)
